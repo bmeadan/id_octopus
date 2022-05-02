@@ -78,7 +78,7 @@ class OctopusCommandHelper {
     if ($remote_url = $this->getDeviceCommandRemoteLink($device_id)) {
       $action = 'start_wash';
       if ($sequence = $this->logCommand($action, $device_id)) {
-        $response = $this->sendCommand($action, $remote_url, $sequence);
+        $response = $this->sendCommand($action, $remote_url, $sequence, $device_id);
       }
     }
 
@@ -101,7 +101,7 @@ class OctopusCommandHelper {
     if ($remote_url = $this->getDeviceCommandRemoteLink($device_id)) {
       $action = 'stop_wash';
       if ($sequence = $this->logCommand($action, $device_id)) {
-        $response = $this->sendCommand($action, $remote_url, $sequence);
+        $response = $this->sendCommand($action, $remote_url, $sequence, $device_id);
       }
     }
 
@@ -144,11 +144,12 @@ class OctopusCommandHelper {
    * @return array
    *   Decoded JSON response.
    */
-  protected function sendCommand(string $action, string $remote_url, string $sequence): array {
+  protected function sendCommand(string $action, string $remote_url, string $sequence, string $device_id): array {
     $options = [
       'json' => [
         'type' => 'command',
         'sequence' => $sequence,
+        'devide_id' => $device_id,
         'action' => $action,
       ],
     ];
