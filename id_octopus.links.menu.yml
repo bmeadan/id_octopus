@@ -1,0 +1,5 @@
+id_octopus.alarm_event_report_mapping_settings:
+  title: Alarm/Event mapping
+  parent: system.admin_config
+  description: Manage Alarm/Event mapping.
+  route_name: id_octopus.alarm_event_report_mapping_settings

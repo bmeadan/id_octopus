@@ -1,0 +1,8 @@
+services:
+  id_octopus.octopus_helper:
+    class: Drupal\id_octopus\OctopusHelper
+    arguments: ['@database', '@config.factory']
+
+  id_octopus.octopus_command_helper:
+    class: Drupal\id_octopus\OctopusCommandHelper
+    arguments: ['@entity_type.manager', '@database', '@http_client']
