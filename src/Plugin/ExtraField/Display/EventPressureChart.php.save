@@ -1,0 +1,107 @@
+<?php
+
+namespace Drupal\id_octopus\Plugin\ExtraField\Display;
+
+use Drupal\Core\Entity\ContentEntityInterface;
+
+/**
+ * Provides Pressure diagram chart.
+ *
+ * @ExtraFieldDisplay(
+ *   id = "event_pressure_chart",
+ *   label = @Translation("Event Pressure Chart"),
+ *   description = @Translation("An extra field that uses dependency injection."),
+ *   bundles = {
+ *     "node.device",
+ *   }
+ * )
+ */
+class EventPressureChart extends DeviceReportBase {
+
+  /**
+   * {@inheritdoc}
+   */
+  public function view(ContentEntityInterface $entity) {
+    $build = [];
+
+    if (($device_id = $this->getDeviceId($entity))
+      && $event_data = $this->octopusHelper->getEventPressureData($device_id)
+    ) {
+      $settings = $this->getSettings();
+
+      $left_pressure = [
+        '#type' => 'chart_data',
+        '#title' => $this->t('Left Pressure'),
+        '#data' => array_column($event_data, 'left_pressure'),
+        '#color' => $settings['left_pressure_color'],
+      ];
+      $right_pressure = [
+        '#type' => 'chart_data',
+        '#title' => $this->t('Right Pressure'),
+        '#data' => array_column($event_data, 'right_pressure'),
+        '#color' => $settings['right_pressure_color'],
+      ];
+      $build['chart'] = [
+        '#type' => 'chart',
+        '#title' => $this->t('Pressure Report'),
+        '#chart_type' => $settings['chart_type'],
+        'left_pressure' => $left_pressure,
+        'right_pressure' => $right_pressure,
+        'x_axis' => [
+          '#type' => 'chart_xaxis',
+          '#title' => $this->t('Date'),
+          '#labels' => array_column($event_data, 'datetime'),
+        ],
+        'y_axis' => [
+          '#type' => 'chart_yaxis',
+          '#title' => $this->t('Pressure'),
+        '#cache' => ['max-age' => 0],
+        ],
+      ];
+    }
+
+    return $build;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function settingsForm() {
+    $form = parent::settingsForm();
+
+    $chart_types = ['area', 'bar', 'column', 'line', 'spline'];
+    $form['chart_type'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Chart Type'),
+      '#options' => array_combine($chart_types, $chart_types),
+    ];
+
+    $form['left_pressure_color'] = [
+      '#type' => 'color',
+      '#title' => $this->t('Left Pressure color'),
+    ];
+
+    $form['right_pressure_color'] = [
+      '#type' => 'color',
+      '#title' => $this->t('Right Pressure color'),
+    ];
+
+    return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function defaultFormValues() {
+    $values = parent::defaultFormValues();
+
+    $values += [
+      'chart_type' => 'spline',
+      'left_pressure_color' => '#1d84c3',
+      'right_pressure_color' => '#77b259',
+    ];
+
+    return $values;
+  }
+
+}
