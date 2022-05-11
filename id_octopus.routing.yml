@@ -1,0 +1,32 @@
+id_octopus.alarm_event_report_mapping_settings:
+  path: '/admin/config/report-mapping'
+  defaults:
+    _form: '\Drupal\id_octopus\Form\ReportMappingSettingsForm'
+    _title: 'Report mapping settings'
+  requirements:
+    _permission: 'access administration pages'
+
+id_octopus.send_command.start:
+  path: '/send-command/{device_id}/start'
+  defaults:
+    _controller: '\Drupal\id_octopus\Controller\DeviceSendCommandController::startCommand'
+    _title: 'Send Start command'
+  requirements:
+    _permission: 'access content'
+
+id_octopus.send_command.stop:
+  path: '/send-command/{device_id}/stop'
+  defaults:
+    _controller: '\Drupal\id_octopus\Controller\DeviceSendCommandController::stopCommand'
+    _title: 'Send Stop command'
+  requirements:
+    _permission: 'access content'
+
+id_octopus.receive_command.test:
+  path: '/receive-command/test'
+  defaults:
+    _controller: '\Drupal\id_octopus\Controller\DeviceSendCommandController::test'
+    _title: 'Test command response'
+  requirements:
+    _permission: 'access content'
+    _format: 'json'
