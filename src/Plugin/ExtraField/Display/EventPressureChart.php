@@ -56,6 +56,11 @@ class EventPressureChart extends DeviceReportBase {
       '#title' => $this->t('Right Pressure color'),
     ];
 
+    $form['alarm_color'] = [
+      '#type' => 'color',
+      '#title' => $this->t('Alarm color'),
+    ];
+
     $form['date_format'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Date format'),
@@ -73,6 +78,7 @@ class EventPressureChart extends DeviceReportBase {
       'chart_type' => 'spline',
       'left_pressure_color' => '#1d84c3',
       'right_pressure_color' => '#77b259',
+      'alarm_color' => '#ffa500',
       'date_format' => 'Y-m-d',
     ];
 

@@ -70,18 +70,10 @@ class PressureChartTimeframeForm extends FormBase {
 
       [$device_id, $settings] = $args;
 
-      // The keys will be used as "-N period" from now. See date_modify() example.
-      $timeframe_options = [
-        '6 hours' => $this->t('6 hours'),
-        '1 day' => $this->t('1 day'),
-        '1 week' => $this->t('1 week'),
-        '1 month' => $this->t('1 month'),
-        'max' => $this->t('Max'),
-      ];
       $form['timeframe'] = [
         '#type' => 'select',
         '#title' => $this->t('Timeframe'),
-        '#options' => $timeframe_options,
+        '#options' => $this->octopusHelper->getTimeframeOptions(),
         '#ajax' => [
           'callback' => '::ajaxCallback',
           'wrapper' => 'pressure-chart-form-wrapper',
@@ -89,16 +81,23 @@ class PressureChartTimeframeForm extends FormBase {
       ];
 
       // Default timeframe on load.
-      $timeframe = '6 hours';
-      if (($triggering_el = $form_state->getTriggeringElement())
-        && $triggering_el['#name'] === 'timeframe'
-      ) {
-        $timeframe = $triggering_el['#value'];
-      }
+      $timeframe = $form_state->getUserInput()['timeframe'] ?? array_key_first($form['timeframe']['#options']);
+      $show_alarms = $form_state->getUserInput()['show_alerts'] ?? FALSE;
+
+      $alarm_data = $show_alarms ? $this->octopusHelper->getAlarmReportData($device_id, ['alarm_timeframe' => $timeframe]) : [];
+
+      $form['show_alerts'] = [
+        '#type' => 'checkbox',
+        '#title' => $this->t('Show Alarms'),
+        '#ajax' => [
+          'callback' => '::ajaxCallback',
+          'wrapper' => 'pressure-chart-form-wrapper',
+        ],
+      ];
 
       $event_data = $this->octopusHelper->getEventPressureData($device_id, $timeframe);
 
-      $form['chart'] = $this->buildChart($event_data, $settings);
+      $form['chart'] = $this->buildChart($event_data, $alarm_data, $settings);
     }
 
     return $form;
@@ -137,7 +136,7 @@ class PressureChartTimeframeForm extends FormBase {
    * @return array
    *   Chart build.
    */
-  public function buildChart($event_data, $settings): array {
+  public function buildChart(array $event_data, array $alarm_data, array $settings): array {
     $left_pressure = [
       '#type' => 'chart_data',
       '#title' => $this->t('Left'),
@@ -151,10 +150,23 @@ class PressureChartTimeframeForm extends FormBase {
       '#color' => $settings['right_pressure_color'],
     ];
 
+    $alarms = [];
+    // Get max value to print Alarms higher on Chert.
+    $max = max(max($left_pressure['#data']), max($right_pressure['#data'])) + 1;
+
     $date_labels = array_column($event_data, 'datetime');
-    foreach ($date_labels as &$value) {
+    foreach ($date_labels as $i => &$value) {
       $value = (new DrupalDateTime($value))->format($settings['date_format']);
-      $value = (new DrupalDateTime())->modify('-' . $value)->format('M d H:i');
+      foreach ($alarm_data as $k => $alarm) {
+        $date = (new DrupalDateTime($alarm['datetime']))->format($settings['date_format']);
+        if ($date === $value) {
+          $alarms[$i] = $max;
+          unset($alarm_data[$k]);
+          break;
+        }
+        // Set empty value to keep order of values by keys.
+        $alarms[$i] = NULL;
+      }
     }
 
     $build = [
@@ -178,6 +190,18 @@ class PressureChartTimeframeForm extends FormBase {
       ],
       '#cache' => ['max-age' => 0],
     ];
+
+    if ($alarms) {
+      $alarm = [
+        '#type' => 'chart_data',
+        '#title' => $this->t('Alarms'),
+        '#data' => $alarms,
+        '#color' => $settings['alarm_color'],
+        '#chart_type' => 'bubble',
+      ];
+
+      $build['alarm'] = $alarm;
+    }
 
     return $build;
   }

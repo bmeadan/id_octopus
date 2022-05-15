@@ -3,6 +3,7 @@
 namespace Drupal\id_octopus\Plugin\ExtraField\Display;
 
 use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\id_octopus\Form\EventReportForm;
 
 /**
  * Provides Event Report.
@@ -24,24 +25,8 @@ class EventReport extends DeviceReportBase {
   public function view(ContentEntityInterface $entity) {
     $build = [];
 
-    if (($device_id = $this->getDeviceId($entity))
-      && $event_data = $this->octopusHelper->getEventReport($device_id)
-    ) {
-      $header =  [
-      ['data' => t('Event')], 
-      ['data' => t('Date'), 'sort' => 'desc'],
-    ];
-        
-      $build['alarm_data'] = [
-        '#type' => 'table',
-        '#caption' => $this->t('Events'),
-        '#header' => $header,
-        '#rows' => $event_data,
-        '#attributes' => [
-          'class' => ['event-report-item'],
-        ],
-        '#cache' => ['max-age' => 0],
-      ];
+    if (($device_id = $this->getDeviceId($entity))) {
+      $build['form'] = \Drupal::formBuilder()->getForm(EventReportForm::class, $device_id);
     }
 
     return $build;

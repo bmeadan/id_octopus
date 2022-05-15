@@ -7,12 +7,15 @@ use Drupal\Core\Config\ImmutableConfig;
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Database\Database;
 use Drupal\Core\Datetime\DrupalDateTime;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\id_octopus\Form\ReportMappingSettingsForm;
 
 /**
  * Helper service to work with Alarm/Event logs.
  */
 class OctopusHelper {
+
+  use StringTranslationTrait;
 
   /**
    * Database connection service definition.
@@ -26,7 +29,7 @@ class OctopusHelper {
    *
    * @var \Drupal\Core\Config\ImmutableConfig
    */
-  protected ImmutableConfig $config;
+  public ImmutableConfig $config;
 
   /**
    * External Database connection.
@@ -50,20 +53,52 @@ class OctopusHelper {
   }
 
   /**
+   * Timeframes filter options.
+   *
+   * The keys will be used as "-N period" from now. See date_modify() example.
+   *
+   * @return array
+   *   Timeframe options.
+   */
+  public function getTimeframeOptions(): array {
+    return [
+      '6 hours' => $this->t('6 hours'),
+      '1 day' => $this->t('1 day'),
+      '1 week' => $this->t('1 week'),
+      '1 month' => $this->t('1 month'),
+      'max' => $this->t('Max'),
+    ];
+  }
+
+  /**
+   * Helper function to get Alarm labels from settings.
+   *
+   * @return array
+   *   Array with db_value => label structure.
+   */
+  public function getAlarmLabels(): array {
+    $alarm_labels = $this->config->get('alarm') ?? [];
+    return array_column($alarm_labels, 'label_value', 'db_value');
+  }
+
+  /**
    * Get Alarm report table data with processed labels.
    *
    * @param string $device_id
    *   Device ID.
+   * @param array $filter
+   *   Filter values to apply.
    *
    * @return array
    *   Array with report data.
    */
-  public function getAlarmReport(string $device_id): array {
-    $report_data = $this->getAlarmReportData($device_id);
-    $alarm_labels = $this->config->get('alarm') ?? [];
-    $alarm_labels = array_column($alarm_labels, 'label_value', 'db_value');
+  public function getAlarmReport(string $device_id, array $filter): array {
+    $report_data = $this->getAlarmReportData($device_id, $filter);
+    $alarm_labels = $this->getAlarmLabels();
     foreach ($report_data as &$data) {
-      $data['alarm_id'] = $alarm_labels[$data['alarm_id']] ?? $data['alarm_id'];
+      if ($data['event_id'] ?? '') {
+        $data['event_id'] = $alarm_labels[$data['event_id']] ?? $data['event_id'];
+      }
     }
 
     return $report_data;
@@ -74,19 +109,53 @@ class OctopusHelper {
    *
    * @param string $device_id
    *   Device ID.
+   * @param array $filter
+   *   Filter values to apply.
    *
    * @return array
    *   Array with report data.
    */
-  public function getAlarmReportData(string $device_id): array {
+  public function getAlarmReportData(string $device_id, array $filter = []): array {
     $query = $this->externalDb->select('alarm_reports', 'ar');
-//    $query = $this->database->select('alarm_reports', 'ar');
-    $query->fields('ar', ['alarm_id', 'datetime']);
-    $query->orderBy('datetime', 'DESC');
-    $query->range(0, 15);
+    $query->fields('ar', ['event_id', 'datetime']);
     $query->condition('device_id', $device_id);
 
+    if ($order_by = $filter['alarm_sort'] ?? NULL) {
+      $order_by = explode('__', $order_by);
+      $query->orderBy($order_by[0], strtoupper($order_by[1]));
+    }
+    else {
+      $query->orderBy('datetime', 'DESC');
+    }
+
+    $timeframe = $filter['alarm_timeframe'] ?? array_key_first($this->getTimeframeOptions());
+    if ($timeframe !== 'max') {
+      $date = (new DrupalDateTime())->modify('-' . $timeframe)->format('Y-m-d H:i:s');
+      $query->condition('datetime', $date, '>=');
+    }
+
+    if (
+      ($alarm_type = $filter['alarm_type'] ?? NULL)
+      && $alarm_type !== '_none'
+    ) {
+      $query->condition('event_id', $alarm_type);
+    }
+
+    // Uncomment if needed.
+//    $query->range(0, 15);
+
     return $query->execute()->fetchAll(\PDO::FETCH_ASSOC);
+  }
+
+  /**
+   * Helper function to get Alarm labels from settings.
+   *
+   * @return array
+   *   Array with db_value => label structure.
+   */
+  public function getEventLabels(): array {
+    $alarm_labels = $this->config->get('event') ?? [];
+    return array_column($alarm_labels, 'label_value', 'db_value');
   }
 
   /**
@@ -94,14 +163,15 @@ class OctopusHelper {
    *
    * @param string $device_id
    *   Device ID.
+   * @param array $filters
+   *   Filter values to apply.
    *
    * @return array
    *   Array with report data.
    */
-  public function getEventReport(string $device_id): array {
-    $report_data = $this->getEventReportData($device_id);
-    $alarm_labels = $this->config->get('event') ?? [];
-    $alarm_labels = array_column($alarm_labels, 'label_value', 'db_value');
+  public function getEventReport(string $device_id, array $filters): array {
+    $report_data = $this->getEventReportData($device_id, $filters);
+    $alarm_labels = $this->getEventLabels();
     foreach ($report_data as &$data) {
       $data['event_id'] = $alarm_labels[$data['event_id']] ?? $data['event_id'];
     }
@@ -114,17 +184,40 @@ class OctopusHelper {
    *
    * @param string $device_id
    *   Device ID.
+   * @param array $filter
+   *   Filter values to apply.
    *
    * @return array
    *   Array with report data.
    */
-  public function getEventReportData(string $device_id): array {
+  public function getEventReportData(string $device_id, array $filter): array {
     $query = $this->externalDb->select('event_reports', 'er');
-//    $query = $this->database->select('event_reports', 'er');
     $query->fields('er', ['event_id', 'datetime']);
-    $query->orderBy('datetime', 'DESC');
-    $query->range(0, 15);
     $query->condition('device_id', $device_id);
+
+    if ($order_by = $filter['event_sort'] ?? NULL) {
+      $order_by = explode('__', $order_by);
+      $query->orderBy($order_by[0], strtoupper($order_by[1]));
+    }
+    else {
+      $query->orderBy('datetime', 'DESC');
+    }
+
+    $timeframe = $filter['event_timeframe'] ?? array_key_first($this->getTimeframeOptions());
+    if ($timeframe !== 'max') {
+      $date = (new DrupalDateTime())->modify('-' . $timeframe)->format('Y-m-d H:i:s');
+      $query->condition('datetime', $date, '>=');
+    }
+
+    if (
+      ($alarm_type = $filter['event_type'] ?? NULL)
+      && $alarm_type !== '_none'
+    ) {
+      $query->condition('event_id', $alarm_type);
+    }
+
+    // Uncomment if needed.
+//    $query->range(0, 15);
 
     return $query->execute()->fetchAll(\PDO::FETCH_ASSOC);
   }
@@ -142,7 +235,6 @@ class OctopusHelper {
    */
   public function getEventPressureData(string $device_id, string $timeframe): array {
     $query = $this->externalDb->select('event_reports', 'er');
-//    $query = $this->database->select('event_reports', 'er');
     $query->fields('er', [
       'datetime',
       'left_pressure',
@@ -170,7 +262,6 @@ class OctopusHelper {
    */
   public function getEventTempVoltageData(string $device_id) {
     $query = $this->externalDb->select('event_reports', 'er');
-//    $query = $this->database->select('event_reports', 'er');
     $query->fields('er', [
       'temperature',
       'voltage',

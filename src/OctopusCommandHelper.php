@@ -140,6 +140,8 @@ class OctopusCommandHelper {
    *   Device remote link.
    * @param string $sequence
    *   Sequence ID.
+   * @param string $device_id
+   *   Device ID.
    *
    * @return array
    *   Decoded JSON response.
@@ -149,7 +151,7 @@ class OctopusCommandHelper {
       'json' => [
         'type' => 'command',
         'sequence' => $sequence,
-        'devide_id' => $device_id,
+        'device_id' => $device_id,
         'action' => $action,
       ],
     ];
