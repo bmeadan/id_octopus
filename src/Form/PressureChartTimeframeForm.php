@@ -93,6 +93,7 @@ class PressureChartTimeframeForm extends FormBase {
           'callback' => '::ajaxCallback',
           'wrapper' => 'pressure-chart-form-wrapper',
         ],
+        '#default_value' => 1,        
       ];
 
       $event_data = $this->octopusHelper->getEventPressureData($device_id, $timeframe);
