@@ -147,14 +147,14 @@ class PressureChartTimeframeForm extends FormBase {
     $right_pressure = [
       '#type' => 'chart_data',
       '#title' => $this->t('Right'),
-      '#data' => array_column($event_data, 'right_pressure'),
+      '#data' => array_column($event_data),
       '#color' => $settings['right_pressure_color'],
     ];
 
     $alarms = [];
     // Get max value to print Alarms higher on Chert.
     $max = max(max($left_pressure['#data']), max($right_pressure['#data'])) + 1;
-
+ 
     $date_labels = array_column($event_data, 'datetime');
     foreach ($date_labels as $i => &$value) {
       $value = (new DrupalDateTime($value))->format($settings['date_format']);
@@ -169,6 +169,7 @@ class PressureChartTimeframeForm extends FormBase {
         $alarms[$i] = NULL;
       }
     }
+//$alarm_type = $this->octopusHelper->getAlarmReport($device_id);
 
     $build = [
       '#type' => 'chart',
