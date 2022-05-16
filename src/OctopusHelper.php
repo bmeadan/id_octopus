@@ -62,14 +62,33 @@ class OctopusHelper {
    */
   public function getTimeframeOptions(): array {
     return [
-      '6 hours' => $this->t('6 hours'),
       '1 day' => $this->t('1 day'),
+      '1 hour' => $this->t('1 hour'),
+      '2 hours' => $this->t('2 hours'),
+      '5 hours' => $this->t('5 hours'),
+      '1 day' => $this->t('1 day'),
+      '2 days' => $this->t('2 days'),
+      '3 days' => $this->t('3 days'),
       '1 week' => $this->t('1 week'),
       '1 month' => $this->t('1 month'),
       'max' => $this->t('Max'),
     ];
   }
 
+  public function getTimeframeOptionsfrom(): array {
+    return [
+      '1 second' => $this->t('Now'),
+      '1 hour' => $this->t('1 hour'),
+      '2 hours' => $this->t('2 hours'),
+      '5 hours' => $this->t('5 hours'),
+      '1 day' => $this->t('1 day'),
+      '2 days' => $this->t('2 days'),
+      '3 days' => $this->t('3 days'),
+      '1 week' => $this->t('1 week'),
+      '1 month' => $this->t('1 month'),
+      'max' => $this->t('Max'),
+    ];
+  }
   /**
    * Helper function to get Alarm labels from settings.
    *
@@ -202,11 +221,14 @@ class OctopusHelper {
     else {
       $query->orderBy('datetime', 'DESC');
     }
-
-    $timeframe = $filter['event_timeframe'] ?? array_key_first($this->getTimeframeOptions());
+    $timeframe_from = $filter['event_timeframe_from'] ?? array_key_first($this->getTimeframeOptionsfrom()); 
+    $timeframe_to = $filter['event_timeframe_to'] ?? array_key_first($this->getTimeframeOptions());
     if ($timeframe !== 'max') {
-      $date = (new DrupalDateTime())->modify('-' . $timeframe)->format('Y-m-d H:i:s');
-      $query->condition('datetime', $date, '>=');
+      $date_from = (new DrupalDateTime())->modify('-' . $timeframe_from)->format('Y-m-d H:i:s');
+      $date_to = (new DrupalDateTime())->modify('-' . $timeframe_to)->format('Y-m-d H:i:s');
+      //$query->condition('datetime', $date, '>=');
+      $query->condition('datetime', [$date_to, $date_from], 'BETWEEN');
+
     }
 
     if (
