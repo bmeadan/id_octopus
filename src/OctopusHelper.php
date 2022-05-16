@@ -204,10 +204,8 @@ class OctopusHelper {
     }
 
     $timeframe = $filter['event_timeframe'] ?? array_key_first($this->getTimeframeOptions());
-    $timeframestop = $filter['event_timeframe'] ?? array_key_first($this->getTimeframeOptions());
     if ($timeframe !== 'max') {
       $date = (new DrupalDateTime())->modify('-' . $timeframe)->format('Y-m-d H:i:s');
-      $datestop = (new DrupalDateTime())->modify('-' . $timeframe)->format('Y-m-d H:i:s');
       $query->condition('datetime', $date, '>=');
     }
 
@@ -247,9 +245,7 @@ class OctopusHelper {
 
     if ($timeframe !== 'max') {
       $date = (new DrupalDateTime())->modify('-' . $timeframe)->format('Y-m-d H:i:s');
-      $datestop = (new DrupalDateTime())->modify('-' . $timeframestop)->format('Y-m-d H:i:s');
       $query->condition('datetime', $date, '>=');
-      $query->condition('datetime', $datestop, '<');
     }
 
     return $query->execute()->fetchAll(\PDO::FETCH_ASSOC);
