@@ -42,7 +42,7 @@ class EventReportForm extends ReportFormBase {
 
       $form['event_filters']['event_timeframe'] = [
         '#type' => 'select',
-        '#title' => $this->t('Timeframe'),
+        '#title' => $this->t('Start Timeframe'),
         '#options' => $this->octopusHelper->getTimeframeOptions(),
         '#ajax' => [
           'callback' => '::ajaxCallback',
@@ -50,6 +50,15 @@ class EventReportForm extends ReportFormBase {
         ],
       ];
 
+      $form['event_filters']['event_timeframestop'] = [
+        '#type' => 'select',
+        '#title' => $this->t('End Timeframe'),
+        '#options' => $this->octopusHelper->getTimeframeOptions(),
+        '#ajax' => [
+          'callback' => '::ajaxCallback',
+          'wrapper' => $wrapper,
+        ],
+      ];
       $form['event_filters']['event_sort'] = [
         '#type' => 'select',
         '#title' => $this->t('Sort by'),
@@ -64,7 +73,7 @@ class EventReportForm extends ReportFormBase {
         '#caption' => $this->t('Event Report'),
         '#header' => [$this->t('Event Type'), $this->t('Date')],
         '#rows' => $alarm_data,
-        '#empty' => $this->t('No data found, change filter options.'),
+        '#empty' => $this->t('No data found for this timeframe, change filter options.'),
         '#attributes' => [
           'class' => ['event-report-item'],
         ],

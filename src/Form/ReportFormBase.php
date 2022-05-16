@@ -70,10 +70,10 @@ abstract class ReportFormBase extends FormBase {
    */
   public function getSortOptions(): array {
     return [
-      'datetime__asc' => $this->t('Date (ASC)'),
       'datetime__desc' => $this->t('Date (DESC)'),
-      'event_id__asc' => $this->t('Alarm type (ASC)'),
+      'datetime__asc' => $this->t('Date (ASC)'),
       'event_id__desc' => $this->t('Alarm type (DESC)'),
+      'event_id__asc' => $this->t('Alarm type (ASC)'),
     ];
   }
 

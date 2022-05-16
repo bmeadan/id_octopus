@@ -64,7 +64,7 @@ class AlarmReportForm extends ReportFormBase {
         '#caption' => $this->t('Alarm Report'),
         '#header' => [$this->t('Alarm Type'), $this->t('Date')],
         '#rows' => $alarm_data,
-        '#empty' => $this->t('No data found, change filter options.'),
+        '#empty' => $this->t('No data found for this timeframe, change filter options.'),
         '#attributes' => [
           'class' => ['alarm-report-item'],
         ],
