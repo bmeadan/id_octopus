@@ -25,12 +25,33 @@ class EventWaterCalculationReport extends DeviceReportBase {
     $build = [];
 
     if (($device_id = $this->getDeviceId($entity))
-      && $event_data = $this->octopusHelper->getWaterCalculationData($device_id)
+      && $event_data = $this->octopusHelper->getWaterCalculationData($device_id,'30')
     ) {
-      $event_data = reset($event_data);
+     //$event_data = reset($event_data);
+      $calcmonth = 0;
+      foreach ($event_data as $value) {
+        //cdie($value);
+        $calctime = abs(strtotime($value[datetime]) - strtotime($value[timestop]));
+        $calcmonth = $calcmonth + $calctime; 
+      }
 
-      
-      $build['water_calculation'] = [
+      $monthtimeuse = date('H:i', $calcmonth);
+}
+     if (($device_id = $this->getDeviceId($entity))
+      && $event_data = $this->octopusHelper->getWaterCalculationData($device_id,'1')
+    ) {
+     //$event_data = reset($event_data);
+      $calcmonth = 0;
+      foreach ($event_data as $value) {
+        //cdie($value);
+        $calctime = abs(strtotime($value[datetime]) - strtotime($value[timestop]));
+        $calcmonth = $calcmonth + $calctime; 
+      }
+
+      $monthtimeuse = date('H:i', $calcmonth);
+}
+/// Finish calculating with one query for both monthly  and daily. Shows nothing. 
+     $build['water_calculation'] = [
         '#type' => 'label',
         '#title' => $this->t('Wash Time Today: @water L', [
           '@water' => $event_data['water'],
@@ -44,7 +65,7 @@ class EventWaterCalculationReport extends DeviceReportBase {
       $build['monthly_water'] = [
         '#type' => 'label',
         '#title' => $this->t('Wash Time this Month: @monthlyWater L', [
-          '@monthlyWater' => $event_data['monthlyWater'],
+          '@monthlyWater' => $monthtimeuse,
         ]),
         '#attributes' => [
           'class' => ['monthlyWater'],
@@ -52,7 +73,7 @@ class EventWaterCalculationReport extends DeviceReportBase {
         '#title_display' => 'before',
         '#cache' => ['max-age' => 0], 
      ];
-    }
+  
 
     return $build;
   }
