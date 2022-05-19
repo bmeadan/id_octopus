@@ -10,6 +10,7 @@ use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\id_octopus\Form\ReportMappingSettingsForm;
 
+
 /**
  * Helper service to work with Alarm/Event logs.
  */
@@ -294,32 +295,3 @@ class OctopusHelper {
 
     return $query->execute()->fetchAll(\PDO::FETCH_ASSOC);
   }
-
-
-/**
-   * Get Water Calculation report raw data.
-   *
-   * @param string $device_id
-   *   Device ID.
-   *
-   * @return array
-   *   Array with report data.
-   */
-  public function getWaterCalculationData(string $device_id) {
-   /* $query = $this->externalDb->select('event_reports', 'er');
-    $query->fields('er', [
-      'temperature',
-      'voltage',
-    ]);*/
-    $query = $this->externalDb->select('water_reports', 'wr');
-    $query->fields('wr', [
-      'water',
-      'monthlyWater',
-    ]);
-    $query->orderBy('datetime', 'DESC');
-    $query->range(0, 1);
-    $query->condition('device_id', $device_id);
-
-    return $query->execute()->fetchAll(\PDO::FETCH_ASSOC);
-  }
-}

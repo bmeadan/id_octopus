@@ -28,6 +28,8 @@ class EventWaterCalculationReport extends DeviceReportBase {
       && $event_data = $this->octopusHelper->getWaterCalculationData($device_id)
     ) {
       $event_data = reset($event_data);
+
+      
       $build['water_calculation'] = [
         '#type' => 'label',
         '#title' => $this->t('Wash Time Today: @water L', [
