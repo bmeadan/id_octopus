@@ -26,7 +26,8 @@ class EventWaterCalculationReport extends DeviceReportBase {
 
 
       $flow_rate = $entity->get('field_flow_rate')->getValue();
-      
+      $flowrate = isset($flow_rate[0]['value']) ? $flow_rate[0]['value'] : 0;
+
 
      /* Get one day wash times */
 
@@ -44,7 +45,7 @@ class EventWaterCalculationReport extends DeviceReportBase {
     else {
       $dailytimeuse = 0;
     }
-    $totalflowd = $monthtimeuse * $flow_rate[0]['value'];
+    $totalflowd = $monthtimeuse * $flowrate;
 
      /* Get one month wash times */
     if (($device_id = $this->getDeviceId($entity))
@@ -63,12 +64,12 @@ class EventWaterCalculationReport extends DeviceReportBase {
       else {
       $monthtimeuse = 0;
     }
-    $totalflowm = $monthtimeuse * $flow_rate[0]['value'];
-    
+    $totalflowm = $monthtimeuse * $flowrate;
+    $flowrate == 0 ? $flowrate = "Not set" : $flowrate; 
       $build['flow_rate'] = [
         '#type' => 'label',
         '#title' => $this->t('Est. Flow Rate: @flow (L/M)', [
-          '@flow' => $flow_rate[0]['value'],
+          '@flow' => $flowrate,
           '@tflow' => $totalflowd,
         ]),
         '#title_display' => 'before',
