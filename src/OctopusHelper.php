@@ -305,19 +305,13 @@ class OctopusHelper {
    * @return array
    *   Array with report data.
    */
-  public function getWaterCalculationData(string $device_id,int $calctimeframe) {
+  public function getWaterCalculationData(string $device_id,string $calctimeframe) {
+    $dater = date('Y-m-d H:i:s', strtotime($calctimeframe));
     $query = $this->externalDb->select('water_reports', 'wr');
     $query->fields('wr', [
       'datetime',
       'timestop',
     ]);
-
-    $dated = date('Y-m-d H:i:s', strtotime('-' . $calctimeframe));
-    $datew = date('Y-m-d H:i:s', strtotime('-7 days'));
-    $datem = date('Y-m-d H:i:s', strtotime('-30 days'));
-    $date = $calctimeframe = '30' ? $datem : $dated; 
-
-    //cdie($datem . ' ' . $dated);
     $query->orderBy('datetime', 'DESC');
     $query->condition('device_id', $device_id);
     $query->condition('datetime', $dater, '>' );

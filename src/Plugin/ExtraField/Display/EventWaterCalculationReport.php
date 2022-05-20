@@ -25,7 +25,7 @@ class EventWaterCalculationReport extends DeviceReportBase {
     $build = [];
 
     if (($device_id = $this->getDeviceId($entity))
-      && $event_data = $this->octopusHelper->getWaterCalculationData($device_id,'30')
+      && $event_data = $this->octopusHelper->getWaterCalculationData($device_id,'-1 month')
     ) {
      //$event_data = reset($event_data);
       $calcmonth = 0;
@@ -36,25 +36,30 @@ class EventWaterCalculationReport extends DeviceReportBase {
       }
 
       $monthtimeuse = date('H:i', $calcmonth);
-}
+    }
+      else {
+      $monthtimeuse = 0;
+    }
+
      if (($device_id = $this->getDeviceId($entity))
-      && $event_data = $this->octopusHelper->getWaterCalculationData($device_id,'1')
+      && $event_datad = $this->octopusHelper->getWaterCalculationData($device_id,'-1 day')
     ) {
-     //$event_data = reset($event_data);
       $calcmonth = 0;
-      foreach ($event_data as $value) {
-        //cdie($value);
+      foreach ($event_datad as $value) {
         $calctime = abs(strtotime($value[datetime]) - strtotime($value[timestop]));
-        $calcmonth = $calcmonth + $calctime; 
+        $calcmday = $calcday + $calctime; 
       }
+      $dailytimeuse = date('H:i', $calcday); 
 
-      $monthtimeuse = date('H:i', $calcmonth);
-}
-/// Finish calculating with one query for both monthly  and daily. Shows nothing. 
+    } 
+    else {
+      $dailytimeuse = 0;
+    }
+
      $build['water_calculation'] = [
         '#type' => 'label',
-        '#title' => $this->t('Wash Time Today: @water L', [
-          '@water' => $event_data['water'],
+        '#title' => $this->t('Wash Time Today: @water (H:M)', [
+          '@water' => $dailytimeuse,
         ]),
         '#title_display' => 'before',
         '#attributes' => [
@@ -64,7 +69,7 @@ class EventWaterCalculationReport extends DeviceReportBase {
       ];
       $build['monthly_water'] = [
         '#type' => 'label',
-        '#title' => $this->t('Wash Time this Month: @monthlyWater L', [
+        '#title' => $this->t('Wash Time this Month: @monthlyWater (H:M)', [
           '@monthlyWater' => $monthtimeuse,
         ]),
         '#attributes' => [
