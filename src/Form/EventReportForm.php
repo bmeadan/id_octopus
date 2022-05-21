@@ -80,6 +80,7 @@ class EventReportForm extends ReportFormBase {
         ],
         '#cache' => ['max-age' => 0],
       ];
+      
     }
 
     return $form;

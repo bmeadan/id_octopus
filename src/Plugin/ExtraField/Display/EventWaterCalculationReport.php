@@ -107,5 +107,6 @@ class EventWaterCalculationReport extends DeviceReportBase {
 
     return $build;
   }
+  
 
 }
