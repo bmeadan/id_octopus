@@ -34,43 +34,41 @@ class EventWaterCalculationReport extends DeviceReportBase {
      if (($device_id = $this->getDeviceId($entity))
       && $event_datad = $this->octopusHelper->getWaterCalculationData($device_id,'-1 day')
     ) {
-      $calcmonth = 0;
+      $calcday = 0;
       foreach ($event_datad as $value) {
-        $calctime = abs(strtotime($value[datetime]) - strtotime($value[timestop]));
-        $calcmday = $calcday + $calctime; 
+        $calctime = abs(strtotime($value[start_time]) - strtotime($value[stop_time]));
+        $calcday = $calcday + $calctime; 
       }
       $dailytimeuse = date('H:i', $calcday); 
-
     } 
     else {
       $dailytimeuse = 0;
     }
-    $totalflowd = $monthtimeuse * $flowrate;
+    $totalflowd = ($calcday/60) * $flowrate;
+    
 
      /* Get one month wash times */
     if (($device_id = $this->getDeviceId($entity))
       && $event_data = $this->octopusHelper->getWaterCalculationData($device_id,'-1 month')
     ) {
-     //$event_data = reset($event_data);
       $calcmonth = 0;
       foreach ($event_data as $value) {
-        //cdie($value);
-        $calctime = abs(strtotime($value[datetime]) - strtotime($value[timestop]));
+        $calctime = abs(strtotime($value[start_time]) - strtotime($value[stop_time]));
         $calcmonth = $calcmonth + $calctime; 
       }
-
       $monthtimeuse = date('H:i', $calcmonth);
     }
       else {
       $monthtimeuse = 0;
     }
-    $totalflowm = $monthtimeuse * $flowrate;
+    $totalflowm = ($calcmonth/60) * $flowrate;
     $flowrate == 0 ? $flowrate = "Not set" : $flowrate; 
+
+
       $build['flow_rate'] = [
         '#type' => 'label',
-        '#title' => $this->t('Est. Flow Rate: @flow (L/M)', [
+        '#title' => $this->t('Est. Flow Rate: @flow m<sup>3</sup>/min', [
           '@flow' => $flowrate,
-          '@tflow' => $totalflowd,
         ]),
         '#title_display' => 'before',
         '#attributes' => [
@@ -81,7 +79,7 @@ class EventWaterCalculationReport extends DeviceReportBase {
 
      $build['water_calculation'] = [
         '#type' => 'label',
-        '#title' => $this->t('Wash Time Today: @water (H:M) | Est. Total Flow Water for Day: @tflowd Litres', [
+        '#title' => $this->t('Wash Time Today: @water (H:M) | Est. Total Flow Water for Day: @tflowd m<sup>3</sup>', [
           '@water' => $dailytimeuse,
           '@tflowd' => $totalflowd,
         ]),
@@ -93,7 +91,7 @@ class EventWaterCalculationReport extends DeviceReportBase {
       ];
       $build['monthly_water'] = [
         '#type' => 'label',
-        '#title' => $this->t('Wash Time this Month: @monthlyWater (H:M) | Est. Total Flow Month for Day: @tflowm Litres', [
+        '#title' => $this->t('Wash Time this Month: @monthlyWater (H:M) | Est. Total Flow Month for Day: @tflowm m<sup>3</sup>', [
           '@monthlyWater' => $monthtimeuse,
           '@tflowm' => $totalflowm,
         ]),
@@ -107,6 +105,6 @@ class EventWaterCalculationReport extends DeviceReportBase {
 
     return $build;
   }
-  
+
 
 }

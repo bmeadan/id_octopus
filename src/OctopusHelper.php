@@ -307,14 +307,15 @@ class OctopusHelper {
    */
   public function getWaterCalculationData(string $device_id,string $calctimeframe) {
     $dater = date('Y-m-d H:i:s', strtotime($calctimeframe));
-    $query = $this->externalDb->select('water_reports', 'wr');
+    $query = $this->externalDb->select('wash_time', 'wr');
     $query->fields('wr', [
-      'datetime',
-      'timestop',
+      'start_time',
+      'stop_time',
+      'duration',
     ]);
-    $query->orderBy('datetime', 'DESC');
+    $query->orderBy('start_time', 'DESC');
     $query->condition('device_id', $device_id);
-    $query->condition('datetime', $dater, '>' );
+    $query->condition('start_time', $dater, '>' );
 
     return $query->execute()->fetchAll(\PDO::FETCH_ASSOC);
   }
