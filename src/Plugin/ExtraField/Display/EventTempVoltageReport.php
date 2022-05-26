@@ -28,20 +28,33 @@ class EventTempVoltageReport extends DeviceReportBase {
       && $event_data = $this->octopusHelper->getEventTempVoltageData($device_id)
     ) {
       $event_data = reset($event_data);
+      $tempcolor = $event_data['temperature'] <= 10 ? 'blue' : 'orange';
+      $tempcolor = $event_data['temperature'] >= 30 ? 'red' : 'orange';
       $build['last_temperature'] = [
         '#type' => 'label',
-        '#title' => $this->t('<div class="boxheading">Temperature:</div> @temperature C <br><div class="chart"></div><style>.chart {
-            background: conic-gradient(red ' . $event_data['temperature'] . '%, #f3f3f3 0%
+        '#title' => $this->t('<div class="boxheading">Temperature:</div> @temperature C <br><div class="dot"></div><div class="tempbar"></div><br><style>.dot {
+            background: conic-gradient(' . $tempcolor .  ' 100%, #f3f3f3 0%
               );
             border-radius: 50%;
             border:2px solid black;
-            width: 30%;
+            width: 15%;
             height: 0;
-            padding-top: 30%;
+            padding-top: 15%;
             padding-right: 20px;
             transform: rotate(-90deg);
-            margin:-50px 50px;
-          }</style>', [
+            margin:-0px 190px;
+          }
+          .tempbar {
+            background: linear-gradient(90deg, ' . $tempcolor .  '  ' . $event_data['temperature']*2 . '%, #00FFFF 0%);
+            transform: rotate(-90deg);
+            height: 50%;
+            width: 36%;
+            border:2px solid black;
+            border-left:none;
+            border-radius:0 10px 10px 0 ;
+            margin: -82px 0px -1px 168px;
+          }
+          </style>', [
           '@temperature' => $event_data['temperature'],
         ]),
         '#title_display' => 'before',
@@ -52,7 +65,20 @@ class EventTempVoltageReport extends DeviceReportBase {
       ];
       $build['last_voltage'] = [
         '#type' => 'label',
-        '#title' => $this->t('<div class="boxheading">Voltage:</div> @voltage V', [
+        '#title' => $this->t('<div class="boxheading">Voltage:</div> @voltage V<div class="voltbartext">' . round($event_data['voltage']/12*100,1) . '%</div><div class="voltbar"></div><style>.voltbar {
+            background: linear-gradient(90deg, darkgreen ' . $event_data['voltage']/12*100 . '%, #00FFFF 0%);
+            transform: rotate(-90deg);
+            height: 100%;
+            width: 40%;
+            border:2px solid black;
+            border-radius:0 10px 10px 0 ;
+            margin: 0px 0px 0px 158px;
+          }
+          .voltbartext {
+            font-size: 12px;
+            margin: -78px 0px 16px 185px; 
+          }
+          }</style>', [
           '@voltage' => $event_data['voltage'],
         ]),
         '#attributes' => [
