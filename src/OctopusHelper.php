@@ -305,6 +305,7 @@ class OctopusHelper {
    * @return array
    *   Array with report data.
    */
+
   public function getWaterCalculationData(string $device_id,string $calctimeframe) {
     $dater = date('Y-m-d H:i:s', strtotime($calctimeframe));
     $query = $this->externalDb->select('wash_time', 'wr');
@@ -320,3 +321,4 @@ class OctopusHelper {
     return $query->execute()->fetchAll(\PDO::FETCH_ASSOC);
   }
 }
+
