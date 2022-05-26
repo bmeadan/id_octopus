@@ -223,7 +223,7 @@ class OctopusHelper {
     }
     $timeframe_from = $filter['event_timeframe_from'] ?? array_key_first($this->getTimeframeOptionsfrom()); 
     $timeframe_to = $filter['event_timeframe_to'] ?? array_key_first($this->getTimeframeOptions());
-    if ($timeframe !== 'max') {
+    if ($timeframe_to !== 'max') {
       $date_from = (new DrupalDateTime())->modify('-' . $timeframe_from)->format('Y-m-d H:i:s');
       $date_to = (new DrupalDateTime())->modify('-' . $timeframe_to)->format('Y-m-d H:i:s');
       //$query->condition('datetime', $date, '>=');

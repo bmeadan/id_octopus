@@ -30,7 +30,18 @@ class EventTempVoltageReport extends DeviceReportBase {
       $event_data = reset($event_data);
       $build['last_temperature'] = [
         '#type' => 'label',
-        '#title' => $this->t('Temperature: @temperature C', [
+        '#title' => $this->t('<div class="boxheading">Temperature:</div> @temperature C <br><div class="chart"></div><style>.chart {
+            background: conic-gradient(red ' . $event_data['temperature'] . '%, #f3f3f3 0%
+              );
+            border-radius: 50%;
+            border:2px solid black;
+            width: 30%;
+            height: 0;
+            padding-top: 30%;
+            padding-right: 20px;
+            transform: rotate(-90deg);
+            margin:-50px 50px;
+          }</style>', [
           '@temperature' => $event_data['temperature'],
         ]),
         '#title_display' => 'before',
@@ -41,7 +52,7 @@ class EventTempVoltageReport extends DeviceReportBase {
       ];
       $build['last_voltage'] = [
         '#type' => 'label',
-        '#title' => $this->t('Voltage: @voltage V', [
+        '#title' => $this->t('<div class="boxheading">Voltage:</div> @voltage V', [
           '@voltage' => $event_data['voltage'],
         ]),
         '#attributes' => [
