@@ -44,7 +44,7 @@ class EventWaterCalculationReport extends DeviceReportBase {
     else {
       $dailytimeuse = 0;
     }
-    $totalflowd = ($calcday/60) * $flowrate;
+    $totalflowd = (round($calcday/60/60,2)) * $flowrate;
     // if changing to m3/hr change to: $totalflowd = ($calcday/(24*60)) * $flowrate;
 
      /* Get one month wash times */
@@ -61,7 +61,7 @@ class EventWaterCalculationReport extends DeviceReportBase {
       else {
       $monthtimeuse = 0;
     }
-    $totalflowm = ($calcmonth/60) * $flowrate;
+    $totalflowm = (round($calcmonth/60/60,2)) * $flowrate;
     // if changing to m3/hr change to: $totalflowm = ($calcmonth/(24*60)) * $flowrate;
 
     $flowrate == 0 ? $flowrate = "Not set" : $flowrate; 
@@ -69,8 +69,8 @@ class EventWaterCalculationReport extends DeviceReportBase {
 
       $build['flow_rate'] = [
         '#type' => 'label',
-        '#title' => $this->t('<div class="boxheading">Est. Flow Rate:</div> @flow m<sup>3</sup>/min', [
-          '@flow' => $flowrate,
+        '#title' => $this->t('<div class="boxheading">Est. Flow Rate:</div> @flow m<sup>3</sup>/hour<div class="flowlink"><a href="#flowrateform">Change Flow Rate</a></div>', [
+          '@flow' => round($flowrate,2),
         ]),
         '#title_display' => 'before',
         '#attributes' => [

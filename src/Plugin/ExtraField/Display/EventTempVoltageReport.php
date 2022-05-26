@@ -37,22 +37,22 @@ class EventTempVoltageReport extends DeviceReportBase {
               );
             border-radius: 50%;
             border:2px solid black;
-            width: 15%;
+            width: 30px;
             height: 0;
-            padding-top: 15%;
+            padding-top: 30px;
             padding-right: 20px;
             transform: rotate(-90deg);
-            margin:-0px 190px;
+            margin:-0px 178px;
           }
           .tempbar {
             background: linear-gradient(90deg, ' . $tempcolor .  '  ' . $event_data['temperature']*2 . '%, #00FFFF 0%);
             transform: rotate(-90deg);
-            height: 50%;
-            width: 36%;
+            height: 20px;
+            width: 75px;
             border:2px solid black;
             border-left:none;
             border-radius:0 10px 10px 0 ;
-            margin: -82px 0px -1px 168px;
+            margin: -76px 0px 0px 156px;
           }
           </style>', [
           '@temperature' => $event_data['temperature'],
@@ -68,8 +68,8 @@ class EventTempVoltageReport extends DeviceReportBase {
         '#title' => $this->t('<div class="boxheading">Voltage:</div> @voltage V<div class="voltbartext">' . round($event_data['voltage']/12*100,1) . '%</div><div class="voltbar"></div><style>.voltbar {
             background: linear-gradient(90deg, darkgreen ' . $event_data['voltage']/12*100 . '%, #00FFFF 0%);
             transform: rotate(-90deg);
-            height: 100%;
-            width: 40%;
+            height: 41px;
+            width: 85px;
             border:2px solid black;
             border-radius:0 10px 10px 0 ;
             margin: 0px 0px 0px 158px;
