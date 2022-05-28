@@ -147,7 +147,7 @@ class PressureChartTimeframeForm extends FormBase {
     $right_pressure = [
       '#type' => 'chart_data',
       '#title' => $this->t('Right'),
-      '#data' => array_column($event_data),
+      '#data' => array_column($event_data, 'left_pressure'),
       '#color' => $settings['right_pressure_color'],
     ];
 

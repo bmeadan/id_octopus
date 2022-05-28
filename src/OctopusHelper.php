@@ -307,7 +307,9 @@ class OctopusHelper {
    */
 
   public function getWaterCalculationData(string $device_id,string $calctimeframe) {
-    $dater = date('Y-m-d H:i:s', strtotime($calctimeframe));
+    //$dater = date('Y-m-d H:i:s', strtotime($calctimeframe));
+    $dater = (new DrupalDateTime())->modify($calctimeframe)->format('Y-m-d H:i:s');
+
     $query = $this->externalDb->select('wash_time', 'wr');
     $query->fields('wr', [
       'start_time',
@@ -316,7 +318,31 @@ class OctopusHelper {
     ]);
     $query->orderBy('start_time', 'DESC');
     $query->condition('device_id', $device_id);
-    $query->condition('start_time', $dater, '>' );
+    $query->condition('start_time', $dater, '>=' );
+    return $query->execute()->fetchAll(\PDO::FETCH_ASSOC);
+  }
+
+
+
+/**
+   * Get Stop Start data.
+   *
+   * @param string $device_id
+   *   Device ID.
+   *
+   * @return array
+   *   Array with report data.
+   */
+
+  public function getEventStartStopData(string $device_id) {
+    $query = $this->externalDb->select('event_reports', 'er');
+    $query->fields('er', [
+      'datetime',
+      'event_id',
+    ]);
+    $query->orderBy('datetime', 'DESC');
+    $query->range(0, 1);
+    $query->condition('device_id', $device_id);
 
     return $query->execute()->fetchAll(\PDO::FETCH_ASSOC);
   }

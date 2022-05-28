@@ -35,24 +35,9 @@ class EventTempVoltageReport extends DeviceReportBase {
         '#title' => $this->t('<div class="boxheading">Temperature:</div> @temperature C <br><div class="dot"></div><div class="tempbar"></div><br><style>.dot {
             background: conic-gradient(' . $tempcolor .  ' 100%, #f3f3f3 0%
               );
-            border-radius: 50%;
-            border:2px solid black;
-            width: 30px;
-            height: 0;
-            padding-top: 30px;
-            padding-right: 20px;
-            transform: rotate(-90deg);
-            margin:-0px 178px;
           }
           .tempbar {
             background: linear-gradient(90deg, ' . $tempcolor .  '  ' . $event_data['temperature']*2 . '%, #00FFFF 0%);
-            transform: rotate(-90deg);
-            height: 20px;
-            width: 75px;
-            border:2px solid black;
-            border-left:none;
-            border-radius:0 10px 10px 0 ;
-            margin: -76px 0px 0px 156px;
           }
           </style>', [
           '@temperature' => $event_data['temperature'],
@@ -63,21 +48,19 @@ class EventTempVoltageReport extends DeviceReportBase {
         ],
         '#cache' => ['max-age' => 0],
       ];
+      if ($event_data['voltage'] < 8) {
+         $voltcolor = "red";
+         $voltwarning = '<div class="lowbattery">Low Battery!</div>'; 
+      }
+      else {
+         $voltcolor = "green";
+      }
       $build['last_voltage'] = [
         '#type' => 'label',
-        '#title' => $this->t('<div class="boxheading">Voltage:</div> @voltage V<div class="voltbartext">' . round($event_data['voltage']/12*100,1) . '%</div><div class="voltbar"></div><style>.voltbar {
-            background: linear-gradient(90deg, darkgreen ' . $event_data['voltage']/12*100 . '%, #00FFFF 0%);
-            transform: rotate(-90deg);
-            height: 41px;
-            width: 85px;
-            border:2px solid black;
-            border-radius:0 10px 10px 0 ;
-            margin: 0px 0px 0px 158px;
+        '#title' => $this->t('<div class="boxheading">Voltage:</div> @voltage V ' . $voltwarning . '<div class="voltbartext">' . round($event_data['voltage']/12*100,1) . '%</div><div class="voltbar"></div><style>.voltbar {
+            background: linear-gradient(90deg, ' . $voltcolor . ' ' . $event_data['voltage']/12*100 . '%, #00FFFF 0%);
           }
-          .voltbartext {
-            font-size: 12px;
-            margin: -78px 0px 16px 185px; 
-          }
+          
           }</style>', [
           '@voltage' => $event_data['voltage'],
         ]),

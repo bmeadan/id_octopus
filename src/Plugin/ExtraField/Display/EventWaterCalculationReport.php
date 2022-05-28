@@ -67,6 +67,28 @@ class EventWaterCalculationReport extends DeviceReportBase {
     $flowrate == 0 ? $flowrate = "Not set" : $flowrate; 
 
 
+
+   /* Create wash times graph for day */
+    if (($device_id = $this->getDeviceId($entity))
+      && $event_data = $this->octopusHelper->getWaterCalculationData($device_id,'-1 month')
+    ) {
+      $i = 0;
+     $durline = '<figure><ul class="sparklist"><li><span class="sparkline">';
+      foreach ($event_data as $value) {
+         $dur = explode(':',$value['duration']);
+           if (count($dur) === 3) {
+            $duration = ($dur[0] * 3600 + $dur[1] * 60 + $dur[2]);
+            $durdata = ' <span class="index"><span class="count" style="height: ' . $duration /5 . '%;">' . $duration . ',</span></span>';
+          }
+          $durline .= $durdata;
+          $i++;          
+          //cdie($duration);
+      }
+      $durline .= '</span></li>';
+    }
+      
+    
+
       $build['flow_rate'] = [
         '#type' => 'label',
         '#title' => $this->t('<div class="boxheading">Est. Flow Rate:</div> @flow m<sup>3</sup>/hour<div class="flowlink"><a href="#flowrateform">Change Flow Rate</a></div>', [
@@ -93,7 +115,7 @@ class EventWaterCalculationReport extends DeviceReportBase {
       ];
       $build['monthly_water'] = [
         '#type' => 'label',
-        '#title' => $this->t('<div class="boxheading">Wash Time this Month:</div> @monthlyWater (H:M) <br> <div class="boxheading2">Est. Monthly Water Use:</div> @tflowm m<sup>3</sup>', [
+        '#title' => $this->t('<div class="boxheading">Monthly Wash Time:</div> @monthlyWater (H:M) <br> <div class="boxheading2">Est. Month Water Use:</div> @tflowm m<sup>3</sup>', [
           '@monthlyWater' => $monthtimeuse,
           '@tflowm' => $totalflowm,
         ]),
@@ -103,7 +125,15 @@ class EventWaterCalculationReport extends DeviceReportBase {
         '#title_display' => 'before',
         '#cache' => ['max-age' => 0], 
      ];
-  
+   $build['dailygraph'] = [
+        '#type' => 'label',
+        '#title' => $this->t('<div class="boxheading">Graph:</div> ' . $durline . ' </ul></figure><div class="graphtable"></div>'),
+        '#title_display' => 'before',
+        '#attributes' => [
+          'class' => ['graphtable'],
+        ],
+        '#cache' => ['max-age' => 0],
+      ];
 
     return $build;
   }
