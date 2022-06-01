@@ -30,7 +30,7 @@ class FlowRateForm extends ReportFormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     if ($args = $form_state->getBuildInfo()['args'] ?? NULL) {
 
-      $form['#prefix'] = '<div id="flow_rate_wrapper">';
+      $form['#prefix'] = '<br><div id="flow_rate_wrapper">';
       $form['#suffix'] = '</div>';
       $node = \Drupal::routeMatch()->getParameter('node');
       if ($node instanceof \Drupal\node\NodeInterface) {

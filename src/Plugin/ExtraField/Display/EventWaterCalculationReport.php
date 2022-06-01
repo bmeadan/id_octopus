@@ -27,7 +27,13 @@ class EventWaterCalculationReport extends DeviceReportBase {
 
       $flow_rate = $entity->get('field_flow_rate')->getValue();
       $flowrate = isset($flow_rate[0]['value']) ? $flow_rate[0]['value'] : 0;
-
+      $water_cost = $entity->get('field_water_cost')->getValue();
+      $cost = isset($water_cost[0]['value']) ? $water_cost[0]['value'] : 0;
+      $user = \Drupal::currentUser();
+      $user_id = \Drupal::currentUser()->id();
+      $user = \Drupal\user\Entity\User::load($user_id);
+      $currency = $user->get('field_currency')->value;
+      if (empty($currency)) { $currency = '$';}
 
      /* Get one day wash times */
      $calcday = 0;
@@ -46,6 +52,10 @@ class EventWaterCalculationReport extends DeviceReportBase {
     }
     $totalflowd = (round($calcday/60/60,2)) * $flowrate;
     // if changing to m3/hr change to: $totalflowd = ($calcday/(24*60)) * $flowrate;
+    $costd = $cost * $totalflowd;
+    $cost == 0 ? $cost = "Not set" : $cost;
+
+
 
      /* Get one month wash times */
     if (($device_id = $this->getDeviceId($entity))
@@ -65,8 +75,8 @@ class EventWaterCalculationReport extends DeviceReportBase {
     // if changing to m3/hr change to: $totalflowm = ($calcmonth/(24*60)) * $flowrate;
 
     $flowrate == 0 ? $flowrate = "Not set" : $flowrate; 
-
-
+    $costm = $cost * $totalflowm;
+    $cost == 0 ? $cost = "Not set" : $cost;
 
    /* Create wash times graph for day */
     if (($device_id = $this->getDeviceId($entity))
@@ -103,9 +113,10 @@ class EventWaterCalculationReport extends DeviceReportBase {
 
      $build['water_calculation'] = [
         '#type' => 'label',
-        '#title' => $this->t('<div class="boxheading">Wash Time Today:</div> @water (H:M) <br> <div class="boxheading2">Est. Daily Water Use:</div> @tflowd m<sup>3</sup>', [
+        '#title' => $this->t('<div class="boxheading">Wash Time Today:</div> @water (H:M) <br> <div class="boxheading2">Est. Daily Water Use:</div> @tflowd m<sup>3</sup> <div class="costitem">Estimated Cost Today: ' . $currency . '@cost </div>', [
           '@water' => $dailytimeuse,
           '@tflowd' => $totalflowd,
+          '@cost' => $costd,
         ]),
         '#title_display' => 'before',
         '#attributes' => [
@@ -115,9 +126,10 @@ class EventWaterCalculationReport extends DeviceReportBase {
       ];
       $build['monthly_water'] = [
         '#type' => 'label',
-        '#title' => $this->t('<div class="boxheading">Monthly Wash Time:</div> @monthlyWater (H:M) <br> <div class="boxheading2">Est. Month Water Use:</div> @tflowm m<sup>3</sup>', [
+        '#title' => $this->t('<div class="boxheading">Monthly Wash Time:</div> @monthlyWater (H:M) <br> <div class="boxheading2">Est. Month Water Use:</div> @tflowm m<sup>3</sup> <div class="costitem">Estimated Monthly Cost: ' . $currency . '@costm </div>', [
           '@monthlyWater' => $monthtimeuse,
           '@tflowm' => $totalflowm,
+          '@costm' => $costm,
         ]),
         '#attributes' => [
           'class' => ['monthlyWater'],
@@ -125,7 +137,7 @@ class EventWaterCalculationReport extends DeviceReportBase {
         '#title_display' => 'before',
         '#cache' => ['max-age' => 0], 
      ];
-   $build['dailygraph'] = [
+   /*$build['dailygraph'] = [
         '#type' => 'label',
         '#title' => $this->t('<div class="boxheading">Graph:</div> ' . $durline . ' </ul></figure><div class="graphtable"></div>'),
         '#title_display' => 'before',
@@ -133,7 +145,7 @@ class EventWaterCalculationReport extends DeviceReportBase {
           'class' => ['graphtable'],
         ],
         '#cache' => ['max-age' => 0],
-      ];
+      ];*/
 
     return $build;
   }
